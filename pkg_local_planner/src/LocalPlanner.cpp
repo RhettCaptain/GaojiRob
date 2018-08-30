@@ -189,6 +189,13 @@ void LocalPlanner::pubVel(){
 			
 		}
 		else if(obsExist){
+			vel.linear.x = 0;
+			vel.linear.y = 0;
+			vel.angular.z = 0;
+			velPub.publish(vel);
+			usleep(2000*1000);
+			
+			/*
 			//avoid obstacle strategy
 			while(ros::ok() && obsExist){
 				ros::spinOnce();
@@ -243,6 +250,7 @@ void LocalPlanner::pubVel(){
 				wait.sleep();
 //printState("remove obstacle",tempLinSpd,0);
 			}
+			*/
 		}
 		else{
 			//control strategy	
