@@ -36,6 +36,7 @@ private:
 	void getPose();
 	void pubPath();
 	void updateInitPose();
+	void updateParam();
 };
 
 

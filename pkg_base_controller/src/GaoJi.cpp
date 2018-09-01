@@ -26,6 +26,7 @@ GaoJi& GaoJi::operator=(const GaoJi& wn){
 void GaoJi::onRecCmdVel(const geometry_msgs::Twist::ConstPtr& msg){
 	double l,r;
 	twist2RotateSpd(msg,&l,&r);
+printf("l:%f, r:%f\n",l,r);
 	move(l,r);
 	pubFakeOdometerMsg(msg);	//it's a fake msg using open-loop and integration
 }
@@ -130,8 +131,8 @@ void GaoJi::move(int leftRotateSpd,int rightRotateSpd){
 	leftRotateSpd = abs(leftRotateSpd);
 	rightRotateSpd = abs(rightRotateSpd);
 
-	leftMove(leftRotateSpd);
-	rightMove(rightRotateSpd);
+	leftMove(rightRotateSpd);
+	rightMove(leftRotateSpd);
 
 //for(uchar c:moveCmd){
 //  std::cout <<(int)c << " " ;

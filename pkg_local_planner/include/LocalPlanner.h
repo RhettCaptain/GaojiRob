@@ -8,6 +8,7 @@
 #include "std_msgs/String.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "tf/tf.h"
+#include "tinyxml2.h"
 #include <vector>
 #include <cmath>
 
@@ -45,7 +46,7 @@ private:
 	double slowDisThreshold;	//slow down when in threshold
 	double disThreshold, angThreshold;	//stop when in threshold 
 	double angLimit,slowAngLimit;	//turn at situ when over angle limit
-	
+	double fixParam;	
 	int spinTimes,maxSpinTimes;	//when spin times arrive max,wait
  
 public:

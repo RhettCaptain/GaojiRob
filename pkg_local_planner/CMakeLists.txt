@@ -117,9 +117,11 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
+set(COMMON_PATH ../pkg_common)
 include_directories(
   ${catkin_INCLUDE_DIRS}
   include
+  ${COMMON_PATH}/tinyxml2/include
 )
 
 ## Declare a C++ library
@@ -135,7 +137,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-  add_executable(node_local_planner src/main.cpp src/LocalPlanner.cpp)
+  add_executable(node_local_planner src/main.cpp src/LocalPlanner.cpp ${COMMON_PATH}/tinyxml2/src/tinyxml2.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

@@ -1,4 +1,6 @@
 #include "LocalPlanner.h"
+
+using namespace tinyxml2;
  
 LocalPlanner::LocalPlanner(){
 	pathSub = nHandle.subscribe("topic_global_path",10,&LocalPlanner::onRecPath,this);
@@ -15,13 +17,22 @@ LocalPlanner::LocalPlanner(){
 	isPause = false;
 	pathIdx = 0;	
 
-	basicLinearSpd = 0.15;//0.25;
-	basicAngularSpd = 0.25;//0.1;
-	slowLinearSpd = 0.1;//0.1;
-	slowDisThreshold = 0.1;	//slow down when dis less than this
-	disThreshold = 0.05;		//arrive when dis less than this
-	angThreshold = 0.2;		//arrive when ang less than this
-	angLimit = 0.5;			//fix dir when ang bigger than this
+	char* xmlPath = new char[100];
+	strcpy(xmlPath,"/home/");
+	strcat(xmlPath,getlogin());
+	strcat(xmlPath,"/srv_rob_conf/param.xml");
+
+	XMLDocument doc;
+	int res = doc.LoadFile(xmlPath);
+	XMLElement* root = doc.RootElement();
+	basicLinearSpd = atof(root->Attribute("basicLinSpd"));	//0.25
+	basicAngularSpd = atof(root->Attribute("basicAngSpd"));//0.25
+	slowLinearSpd = atof(root->Attribute("slowLinSpd"));//0.1;
+	slowDisThreshold = atof(root->Attribute("slowDis"));	//slow down when dis less than this
+	disThreshold = atof(root->Attribute("disThr"));		//arrive when dis less than this
+	angThreshold = atof(root->Attribute("angThr"));		//arrive when ang less than this
+	angLimit = atof(root->Attribute("angLimit"));			//fix dir when ang bigger than this
+	fixParam = atof(root->Attribute("fixParam"));
 	slowAngLimit = 0.3;		
 
 	spinTimes = 0;
@@ -160,9 +171,9 @@ void LocalPlanner::pubVel(){
 						velPub.publish(vel);
 						wait.sleep();
 					}
-//printState("in the last goal dis and adjusting ang",0,vel.angular.z);
+printState("in the last goal dis and adjusting ang",0,vel.angular.z);
 				}
-//printState("in thr",0,0);
+printState("in thr",0,0);
 				spinTimes = 0;
 				vel.linear.x = 0;
 				vel.linear.y = 0;
@@ -174,17 +185,17 @@ void LocalPlanner::pubVel(){
 			//	path.clear();
 			//	pathIdx = 0;
 			//	taskFin = true;
-//printState("arrive the last second goal,waiting for taking meals",0,0);
+printState("arrive the last second goal,waiting for taking meals",0,0);
 			}else if(pathIdx == path.size()-1){
 				path.clear();
 				pathIdx = 0;
 				taskFin = true;
-//printState("arrive the last goal",0,0);
+printState("arrive the last goal",0,0);
 			}
 			else{
 				//next goal
 				pathIdx++;
-//printState("arrive a temp goal",0,0);
+printState("arrive a temp goal",0,0);
 			}
 			
 		}
@@ -259,7 +270,8 @@ void LocalPlanner::pubVel(){
 				biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
 			}else{
 			//	biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
-				biasAng = 0.01;
+				biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
+			//	biasAng = 0.01;
 			}
 			
 			int spinDir = biasAng / fabs(biasAng);
@@ -282,7 +294,8 @@ void LocalPlanner::pubVel(){
 						biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
 					}else{
 				//		biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
-						biasAng = 0.01;
+						biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
+				//		biasAng = 0.01;
 					}
 					spinDir = biasAng / fabs(biasAng);
 				//	spinDir = 1;
@@ -294,17 +307,17 @@ void LocalPlanner::pubVel(){
 						velPub.publish(vel);
 						wait.sleep();
 					}
-//printState("normal area adjusting ang",0,vel.angular.z);
+printState("normal area adjusting ang",0,vel.angular.z);
 				}
 			}
 			else{
 				spinTimes = 0;
 				vel.linear.x = tempLinSpd;
 				vel.linear.y = 0;
-				vel.angular.z = spinDir *  tempAngSpd * 0;
+				vel.angular.z = spinDir *  tempAngSpd * fabs(biasAng) / angLimit * fixParam;
 				velPub.publish(vel);
 				wait.sleep();
-//printState("normal area moving",tempLinSpd,vel.angular.z);
+printState("normal area moving",tempLinSpd,vel.angular.z);
 			}
 		}
 

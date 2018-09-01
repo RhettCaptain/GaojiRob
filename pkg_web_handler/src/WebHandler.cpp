@@ -38,6 +38,8 @@ std::cout << "connected" << std::endl;
 			}
 			else if(cmd == "CMD_UPDATE_INIT_POSE"){
 				updateInitPose();
+			}else if(cmd == "CMD_UPDATE_PARAM"){
+				updateParam();
 			}
 		}
 		
@@ -167,4 +169,28 @@ std::cout << content << std::endl;
         resetPub.publish(resetMsg);
 }
 
+void WebHandler::updateParam(){
+	char* content = new char[200];
+	char split = ';';
+	sock.readline(content,200);
+//std::cout << content << std::endl;
 
+	char* xmlPath = new char[100];
+        strcpy(xmlPath,"/home/");
+        strcat(xmlPath, getlogin());
+        strcat(xmlPath, "/srv_rob_conf/param.xml");
+
+	XMLDocument doc;
+        int res = doc.LoadFile(xmlPath);
+        XMLElement* root = doc.RootElement();
+	root->SetAttribute("basicLinSpd",strtok(content,&split));
+	root->SetAttribute("basicAngSpd",strtok(NULL,&split));
+	root->SetAttribute("slowDis",strtok(NULL,&split));
+	root->SetAttribute("slowLinSpd",strtok(NULL,&split));
+	root->SetAttribute("disThr",strtok(NULL,&split));
+	root->SetAttribute("angThr",strtok(NULL,&split));
+	root->SetAttribute("angLimit",strtok(NULL,&split));
+	root->SetAttribute("fixParam",strtok(NULL,&split));
+	doc.SaveFile(xmlPath);
+	delete[] content;
+}
